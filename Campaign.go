@@ -4,24 +4,25 @@ import (
 	"fmt"
 	errortools "github.com/leapforce-libraries/go_errortools"
 	go_http "github.com/leapforce-libraries/go_http"
+	"github.com/leapforce-libraries/go_mailchimp/types"
 	"net/http"
 	"net/url"
 	"time"
 )
 
 type Campaign struct {
-	Id                string    `json:"id"`
-	WebId             int       `json:"web_id"`
-	Type              string    `json:"type"`
-	CreateTime        time.Time `json:"create_time"`
-	ArchiveUrl        string    `json:"archive_url"`
-	LongArchiveUrl    string    `json:"long_archive_url"`
-	Status            string    `json:"status"`
-	EmailsSent        int       `json:"emails_sent"`
-	SendTime          time.Time `json:"send_time"`
-	ContentType       string    `json:"content_type"`
-	NeedsBlockRefresh bool      `json:"needs_block_refresh"`
-	Resendable        bool      `json:"resendable"`
+	Id                string                `json:"id"`
+	WebId             int                   `json:"web_id"`
+	Type              string                `json:"type"`
+	CreateTime        types.DateTimeString  `json:"create_time"`
+	ArchiveUrl        string                `json:"archive_url"`
+	LongArchiveUrl    string                `json:"long_archive_url"`
+	Status            string                `json:"status"`
+	EmailsSent        int                   `json:"emails_sent"`
+	SendTime          *types.DateTimeString `json:"send_time"`
+	ContentType       string                `json:"content_type"`
+	NeedsBlockRefresh bool                  `json:"needs_block_refresh"`
+	Resendable        bool                  `json:"resendable"`
 	Recipients        struct {
 		ListId         string `json:"list_id"`
 		ListIsActive   bool   `json:"list_is_active"`
@@ -73,9 +74,9 @@ type Campaign struct {
 		SubscriberClicks int     `json:"subscriber_clicks"`
 		ClickRate        float64 `json:"click_rate"`
 		Ecommerce        struct {
-			TotalOrders  int `json:"total_orders"`
-			TotalSpent   int `json:"total_spent"`
-			TotalRevenue int `json:"total_revenue"`
+			TotalOrders  int     `json:"total_orders"`
+			TotalSpent   float64 `json:"total_spent"`
+			TotalRevenue float64 `json:"total_revenue"`
 		} `json:"ecommerce"`
 	} `json:"report_summary"`
 	DeliveryStatus struct {
@@ -84,11 +85,21 @@ type Campaign struct {
 	Links []Link `json:"_links"`
 }
 
+type CampaignType string
+
+const (
+	CampaignTypeRegular   CampaignType = "regular"
+	CampaignTypePlaintext CampaignType = "plaintext"
+	CampaignTypeAbSplit   CampaignType = "absplit"
+	CampaignTypeRss       CampaignType = "rss"
+	CampaignTypeVariate   CampaignType = "variate"
+)
+
 type ListCampaignsConfig struct {
 	Fields           *[]string
 	ExcludeFields    *[]string
 	Count            *int64
-	Type             *string
+	Type             *CampaignType
 	Status           *string
 	BeforeSendTime   *time.Time
 	SinceSendTime    *time.Time
@@ -115,6 +126,11 @@ func (service *Service) ListCampaigns(cfg *ListCampaignsConfig) (*[]Campaign, *e
 	var campaigns []Campaign
 
 	var values = url.Values{}
+	var count = countDefault
+	if cfg.Count != nil {
+		count = *cfg.Count
+	}
+	values.Set("count", fmt.Sprintf("%v", count))
 
 	for {
 		var response ListCampaignsResponse
@@ -124,6 +140,7 @@ func (service *Service) ListCampaigns(cfg *ListCampaignsConfig) (*[]Campaign, *e
 			Url:           service.url(fmt.Sprintf("campaigns?%s", values.Encode())),
 			ResponseModel: &response,
 		}
+		fmt.Println(requestConfig.Url)
 
 		_, _, e := service.httpRequest(&requestConfig)
 		if e != nil {

@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	apiName string = "Mailchimp"
-	apiUrl  string = "https://%s.api.mailchimp.com/3.0"
+	apiName      string = "Mailchimp"
+	apiUrl       string = "https://%s.api.mailchimp.com/3.0"
+	countDefault int64  = 100
 )
 
 type Service struct {
@@ -60,6 +61,7 @@ func (service *Service) httpRequest(requestConfig *go_http.RequestConfig) (*http
 		headers = &http.Header{}
 	}
 	headers.Set("Authorization", fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("anystring:%s", service.apiKey)))))
+	requestConfig.NonDefaultHeaders = headers
 
 	// add error model
 	service.errorResponse = &ErrorResponse{}
