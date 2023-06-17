@@ -7,6 +7,7 @@ import (
 	"github.com/leapforce-libraries/go_mailchimp/types"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -145,11 +146,32 @@ func (service *Service) ListCampaignReports(cfg *ListCampaignReportsConfig) (*[]
 	var campaignReports []CampaignReport
 
 	var values = url.Values{}
+
+	if cfg.Fields != nil {
+		values.Set("fields", strings.Join(*cfg.Fields, ","))
+	}
+
+	if cfg.ExcludeFields != nil {
+		values.Set("exclude_fields", strings.Join(*cfg.ExcludeFields, ","))
+	}
+
 	var count = countDefault
 	if cfg.Count != nil {
 		count = *cfg.Count
 	}
 	values.Set("count", fmt.Sprintf("%v", count))
+
+	if cfg.Type != nil {
+		values.Set("type", string(*cfg.Type))
+	}
+
+	if cfg.BeforeSendTime != nil {
+		values.Set("before_send_time", (*cfg.BeforeSendTime).Format(types.DateTimeFormat))
+	}
+
+	if cfg.SinceSendTime != nil {
+		values.Set("since_send_time", (*cfg.SinceSendTime).Format(types.DateTimeFormat))
+	}
 
 	for {
 		var response ListCampaignReportsResponse
@@ -159,7 +181,6 @@ func (service *Service) ListCampaignReports(cfg *ListCampaignReportsConfig) (*[]
 			Url:           service.url(fmt.Sprintf("reports?%s", values.Encode())),
 			ResponseModel: &response,
 		}
-		fmt.Println(requestConfig.Url)
 
 		_, _, e := service.httpRequest(&requestConfig)
 		if e != nil {

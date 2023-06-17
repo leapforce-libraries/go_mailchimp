@@ -7,6 +7,7 @@ import (
 	"github.com/leapforce-libraries/go_mailchimp/types"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -95,12 +96,22 @@ const (
 	CampaignTypeVariate   CampaignType = "variate"
 )
 
+type CampaignStatus string
+
+const (
+	CampaignStatusSave     CampaignStatus = "save"
+	CampaignStatusPaused   CampaignStatus = "paused"
+	CampaignStatusSchedule CampaignStatus = "schedule"
+	CampaignStatusSending  CampaignStatus = "sending"
+	CampaignStatusSent     CampaignStatus = "sent"
+)
+
 type ListCampaignsConfig struct {
 	Fields           *[]string
 	ExcludeFields    *[]string
 	Count            *int64
 	Type             *CampaignType
-	Status           *string
+	Status           *CampaignStatus
 	BeforeSendTime   *time.Time
 	SinceSendTime    *time.Time
 	BeforeCreateTime *time.Time
@@ -126,11 +137,64 @@ func (service *Service) ListCampaigns(cfg *ListCampaignsConfig) (*[]Campaign, *e
 	var campaigns []Campaign
 
 	var values = url.Values{}
+
+	if cfg.Fields != nil {
+		values.Set("fields", strings.Join(*cfg.Fields, ","))
+	}
+
+	if cfg.ExcludeFields != nil {
+		values.Set("exclude_fields", strings.Join(*cfg.ExcludeFields, ","))
+	}
+
 	var count = countDefault
 	if cfg.Count != nil {
 		count = *cfg.Count
 	}
 	values.Set("count", fmt.Sprintf("%v", count))
+
+	if cfg.Type != nil {
+		values.Set("type", string(*cfg.Type))
+	}
+
+	if cfg.Status != nil {
+		values.Set("status", string(*cfg.Status))
+	}
+
+	if cfg.BeforeSendTime != nil {
+		values.Set("before_send_time", (*cfg.BeforeSendTime).Format(types.DateTimeFormat))
+	}
+
+	if cfg.SinceSendTime != nil {
+		values.Set("since_send_time", (*cfg.SinceSendTime).Format(types.DateTimeFormat))
+	}
+
+	if cfg.BeforeCreateTime != nil {
+		values.Set("before_create_time", (*cfg.BeforeCreateTime).Format(types.DateTimeFormat))
+	}
+
+	if cfg.SinceCreateTime != nil {
+		values.Set("since_create_time", (*cfg.SinceCreateTime).Format(types.DateTimeFormat))
+	}
+
+	if cfg.ListId != nil {
+		values.Set("list_id", *cfg.ListId)
+	}
+
+	if cfg.FolderId != nil {
+		values.Set("folder_id", *cfg.FolderId)
+	}
+
+	if cfg.MemberId != nil {
+		values.Set("member_id", *cfg.MemberId)
+	}
+
+	if cfg.SortField != nil {
+		values.Set("sort_field", *cfg.SortField)
+	}
+
+	if cfg.SortDir != nil {
+		values.Set("sort_dir", *cfg.SortDir)
+	}
 
 	for {
 		var response ListCampaignsResponse
@@ -140,7 +204,6 @@ func (service *Service) ListCampaigns(cfg *ListCampaignsConfig) (*[]Campaign, *e
 			Url:           service.url(fmt.Sprintf("campaigns?%s", values.Encode())),
 			ResponseModel: &response,
 		}
-		fmt.Println(requestConfig.Url)
 
 		_, _, e := service.httpRequest(&requestConfig)
 		if e != nil {
