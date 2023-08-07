@@ -140,7 +140,7 @@ type ListCampaignReportsResponse struct {
 
 func (service *Service) ListCampaignReports(cfg *ListCampaignReportsConfig) (*[]CampaignReport, *errortools.Error) {
 	if cfg == nil {
-		return nil, errortools.ErrorMessage("ListCampaignReportsConfig must not be bil")
+		return nil, errortools.ErrorMessage("ListCampaignReportsConfig must not be nil")
 	}
 
 	var campaignReports []CampaignReport

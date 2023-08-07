@@ -75,7 +75,7 @@ type ListCampaignRecipientsResponse struct {
 
 func (service *Service) ListCampaignRecipients(cfg *ListCampaignRecipientsConfig) (*[]CampaignRecipient, *errortools.Error) {
 	if cfg == nil {
-		return nil, errortools.ErrorMessage("ListCampaignRecipientsConfig must not be bil")
+		return nil, errortools.ErrorMessage("ListCampaignRecipientsConfig must not be nil")
 	}
 
 	var campaignReports []CampaignRecipient

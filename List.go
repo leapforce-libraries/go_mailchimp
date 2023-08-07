@@ -90,7 +90,7 @@ type ListListsResponse struct {
 
 func (service *Service) ListLists(cfg *ListListsConfig) (*[]List, *errortools.Error) {
 	if cfg == nil {
-		return nil, errortools.ErrorMessage("ListListsConfig must not be bil")
+		return nil, errortools.ErrorMessage("ListListsConfig must not be nil")
 	}
 
 	var lists []List
