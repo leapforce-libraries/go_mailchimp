@@ -2,13 +2,14 @@ package mailchimp
 
 import (
 	"fmt"
-	errortools "github.com/leapforce-libraries/go_errortools"
-	go_http "github.com/leapforce-libraries/go_http"
-	"github.com/leapforce-libraries/go_mailchimp/types"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	errortools "github.com/leapforce-libraries/go_errortools"
+	go_http "github.com/leapforce-libraries/go_http"
+	"github.com/leapforce-libraries/go_mailchimp/types"
 )
 
 type List struct {
