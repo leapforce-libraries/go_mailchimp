@@ -3,12 +3,12 @@ module github.com/leapforce-libraries/go_mailchimp
 go 1.20
 
 require (
+	cloud.google.com/go v0.110.0
 	github.com/leapforce-libraries/go_errortools v0.0.0-20230306211452-9ccee0cdafe8
 	github.com/leapforce-libraries/go_http v0.0.0-20230420114702-86cc77fcf983
 )
 
 require (
-	cloud.google.com/go v0.110.0 // indirect
 	cloud.google.com/go/bigquery v1.49.0 // indirect
 	cloud.google.com/go/compute v1.18.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
